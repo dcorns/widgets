@@ -51,12 +51,11 @@ let storeWidget = (widg: widget, ary: widget[]): widget[] =>{
 };
 
 let runCommand = (method: string, obj: {id?:string, name?:string, description?:string, price?:string}): any =>{
-  console.dir(obj);
   switch (method){
     case 'POST':
       return storeWidget(makeWidget(obj, currentId++), widgets);
     case 'GET':
-      if(obj.id) return getOneWidget(parseInt(obj.id, 10), widgets);
+      if(parseInt(obj.id) > 0) return getOneWidget(parseInt(obj.id, 10), widgets);
       return widgets;
     case 'PUT':
       return updateWidget({
@@ -72,10 +71,16 @@ let runCommand = (method: string, obj: {id?:string, name?:string, description?:s
 
 http.createServer(function(req, res){
   //console.log(req.url, req.method, req.headers);
-  console.log(req.url);
+  let result;
   let input: Object = queryString.parse(req.url.slice(2,req.url.length - 1));
-  let result = runCommand(req.method, input);
+  if(req.method === 'GET'){
+    let testUrl: string[] = req.url.split('/');
+    testUrl[1] ? result = runCommand('GET', {id: testUrl[1]}) : result = runCommand('GET', {id: 0});
+  }
+  else result = runCommand(req.method, input);
+
   console.dir(result);
+
   if (result !== 'err'){
     res.statusCode = 200;
     res.end('' + result);
