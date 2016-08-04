@@ -61,7 +61,7 @@ http.createServer(function (req, res) {
     console.dir(result);
     if (result !== 'err') {
         res.statusCode = 200;
-        res.end(result);
+        res.end('' + result);
     }
     else {
         res.statusCode = 400;
