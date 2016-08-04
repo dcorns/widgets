@@ -3,8 +3,8 @@
  */
 ///<reference path="typings/index.d.ts" />
 'use strict';
-const http = require('http');
-
+import http = require('http');
+import queryString = require('querystring');
 interface widget{
   id: number,
   name: string,
@@ -15,12 +15,12 @@ interface widget{
 let currentId: number = 1;
 let widgets: widget[] = [];
 
-let makeWidget = (ary: [string], nextId: number): widget =>{
+let makeWidget = (obj: {name: string, description: string, price: string}, nextId: number): widget =>{
   return {
     id: nextId,
-    name: ary[2],
-    description: ary[3],
-    price: parseFloat(ary[4])
+    name: obj.name,
+    description: obj.description,
+    price: parseFloat(obj.price)
   };
 };
 
@@ -50,29 +50,31 @@ let storeWidget = (widg: widget, ary: widget[]): widget[] =>{
   return ary;
 };
 
-let runCommand = (ary: [string]): any =>{
-  switch (ary[1]){
-    case 'Create':
-      return storeWidget(makeWidget(ary, currentId++), widgets);
-    case 'Read':
-      return getOneWidget(parseInt(ary[2], 10), widgets);
-    case 'List':
+let runCommand = (method: string, obj: {id?:string, name?:string, description?:string, price?:string}): any =>{
+  console.dir(obj);
+  switch (method){
+    case 'POST':
+      return storeWidget(makeWidget(obj, currentId++), widgets);
+    case 'GET':
+      if(obj.id) return getOneWidget(parseInt(obj.id, 10), widgets);
       return widgets;
-    case 'Update':
+    case 'PUT':
       return updateWidget({
-        id: parseInt(ary[2]),
-        name: ary[3],
-        description: ary[4],
-        price: parseFloat(ary[5])
+        id: parseInt(obj.id),
+        name: obj.name,
+        description: obj.description,
+        price: parseFloat(obj.price)
       }, widgets);
-    case 'Delete':
-      return deleteWidget(parseInt(ary[2], 10), widgets);
+    case 'DELETE':
+      return deleteWidget(parseInt(obj.id, 10), widgets);
   }
 };
 
 http.createServer(function(req, res){
-  let input: [string] = req.url.split('/');
-  let result = runCommand(input);
+  //console.log(req.url, req.method, req.headers);
+  console.log(req.url);
+  let input: Object = queryString.parse(req.url.slice(2,req.url.length - 1));
+  let result = runCommand(req.method, input);
   console.dir(result);
   if (result !== 'err'){
     res.statusCode = 200;
