@@ -5,12 +5,16 @@
 'use strict';
 import http = require('http');
 import queryString = require('querystring');
+import fs = require('fs');
+
 interface widget{
   id: number,
   name: string,
   description: string,
   price: number
 }
+
+
 
 let currentId: number = 1;
 let widgets: widget[] = [];
@@ -50,40 +54,44 @@ let storeWidget = (widg: widget, ary: widget[]): widget[] =>{
   return ary;
 };
 
-let runCommand = (method: string, obj: {id?:string, name?:string, description?:string, price?:string}): any =>{
+let runCommand = (method: string, obj: {id:string, name:string, description:string, price:string}): any =>{
   switch (method){
     case 'POST':
       return storeWidget(makeWidget(obj, currentId++), widgets);
     case 'GET':
-      if(parseInt(obj.id) > 0) return getOneWidget(parseInt(obj.id, 10), widgets);
+      if(parseInt(obj.id, 10) > 0) return getOneWidget(parseInt(obj.id, 10), widgets);
       return widgets;
     case 'PUT':
       return updateWidget({
-        id: parseInt(obj.id),
+        id: parseInt(obj.id, 10),
         name: obj.name,
         description: obj.description,
         price: parseFloat(obj.price)
       }, widgets);
     case 'DELETE':
-      return deleteWidget(parseInt(obj.id, 10), widgets);
+      if(parseInt(obj.id, 10) > 0) return deleteWidget(parseInt(obj.id, 10), widgets);
+      return widgets;
   }
 };
 
 http.createServer(function(req, res){
   //console.log(req.url, req.method, req.headers);
   let result;
-  let input: Object = queryString.parse(req.url.slice(2,req.url.length - 1));
-  if(req.method === 'GET'){
+  let input = queryString.parse(req.url.slice(2,req.url.length - 1));
+  if(!(input.id)) input.id = 0;
+  if(req.method === 'GET' || req.method === 'DELETE'){
     let testUrl: string[] = req.url.split('/');
-    testUrl[1] ? result = runCommand('GET', {id: testUrl[1]}) : result = runCommand('GET', {id: 0});
+    testUrl[1] ? result = runCommand(req.method, {id: testUrl[1]}) : result = runCommand(req.method, {id: '0'});
   }
-  else result = runCommand(req.method, input);
+  else{
+    result = runCommand(req.method, input);
+  }
 
   console.dir(result);
 
-  if (result !== 'err'){
+  if (result){
     res.statusCode = 200;
-    res.end('' + result);
+    res.end(JSON.stringify(result));
   }
   else{
     res.statusCode = 400;
