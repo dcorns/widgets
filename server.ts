@@ -6,6 +6,8 @@
 import http = require('http');
 import url = require('url');
 import fs = require('fs');
+import readLine = require('readline');
+import path = require('path');
 
 interface widget{
   id: number,
@@ -14,8 +16,28 @@ interface widget{
   price: number
 }
 
-let currentId: number = 1;
+let rl = readLine.createInterface({
+  input: fs.createReadStream('widgetData.db'),
+  terminal: false
+});
+let currentId: number = -1;
 let widgets: widget[] = [];
+let lineIn: string[] = [];
+//Get Data
+rl.on('line', (ln): void =>{
+  if(currentId < 0){
+    currentId = parseInt(ln, 10) + 1;
+  }
+  else{
+    lineIn = ln.trim.split(':');
+    widgets.push({
+      id: parseInt(lineIn[0],10),
+      name: lineIn[1],
+      description: lineIn[2],
+      price: parseFloat(lineIn[3])
+    });
+  }
+});
 
 let makeWidget = (obj: {name: string, description: string, price: string}, nextId: number): widget =>{
   return {
