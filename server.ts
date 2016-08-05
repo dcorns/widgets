@@ -4,7 +4,7 @@
 ///<reference path="typings/index.d.ts" />
 'use strict';
 import http = require('http');
-import queryString = require('querystring');
+import url = require('url');
 import fs = require('fs');
 
 interface widget{
@@ -13,8 +13,6 @@ interface widget{
   description: string,
   price: number
 }
-
-
 
 let currentId: number = 1;
 let widgets: widget[] = [];
@@ -77,7 +75,7 @@ let runCommand = (method: string, obj: {id:string, name:string, description:stri
 http.createServer(function(req, res){
   //console.log(req.url, req.method, req.headers);
   let result;
-  let input = queryString.parse(req.url.slice(2,req.url.length - 1));
+  let input = url.parse(req.url,true).query;
   if(!(input.id)) input.id = 0;
   if(req.method === 'GET' || req.method === 'DELETE'){
     let testUrl: string[] = req.url.split('/');
