@@ -15,6 +15,6 @@ But the data is persisted to a file and proper CRUD requests are required using 
 ###Usage
 **Create:** POST request to http:/localhost:5000/?name=myWidgetName&description=my widget description&price=3.24<br>
 **Read:** GET request to http:/localhost:5000/1 (widget id)<br>
-**List:** GET request to http:/localhost:5000/<br>
+**List:** GET request to http:/localhost:5000/ or with List<br>
 **Update:** PUT request to http:/localhost:5000/?id=1&name=myWidgetName&description=my widget description&price=3.24<br>
 **Delete:** DELETE request to http:/localhost:5000/1 (widget id)<br>
