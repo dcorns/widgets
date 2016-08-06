@@ -16,28 +16,23 @@ interface widget{
   price: number
 }
 
-let rl = readLine.createInterface({
-  input: fs.createReadStream('widgetData.db'),
-  terminal: false
-});
 let currentId: number = -1;
 let widgets: widget[] = [];
-let lineIn: string[] = [];
-//Get Data
-rl.on('line', (ln): void =>{
-  if(currentId < 0){
-    currentId = parseInt(ln, 10) + 1;
-  }
-  else{
-    lineIn = ln.trim.split(':');
-    widgets.push({
-      id: parseInt(lineIn[0],10),
-      name: lineIn[1],
-      description: lineIn[2],
-      price: parseFloat(lineIn[3])
-    });
-  }
-});
+
+let getData = (dataFile: string, cb:Function): void =>{
+  fs.readFile(dataFile, 'utf8', (err, data): void =>{
+    if(err) console.log(err);
+    cb(null, JSON.parse(data));
+  });
+};
+
+let writeData = (idx: number, ary: widget[], dataFile: string): void =>{
+  let allData = {idx: idx, widgets: ary};
+  fs.writeFile(dataFile, JSON.stringify(allData), (err): void =>{
+    if(err) console.log(err);
+  });
+};
+
 
 let makeWidget = (obj: {name: string, description: string, price: string}, nextId: number): widget =>{
   return {
@@ -94,6 +89,13 @@ let runCommand = (method: string, obj: {id:string, name:string, description:stri
   }
 };
 
+getData('widgetData.db', (err, data: {idx: number, widgets: widget[]}): void => {
+  if(err) console.log(err);
+  currentId = data.idx;
+  widgets = data.widgets;
+});
+
+
 http.createServer(function(req, res){
   //console.log(req.url, req.method, req.headers);
   let result;
@@ -107,7 +109,7 @@ http.createServer(function(req, res){
     result = runCommand(req.method, input);
   }
 
-  console.dir(result);
+  if(req.method === 'DELETE' || 'POST' || 'PUT') writeData(currentId, widgets, 'widgetData.db');
 
   if (result){
     res.statusCode = 200;
