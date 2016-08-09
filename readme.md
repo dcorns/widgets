@@ -1,6 +1,6 @@
 #widgets
 ##Branch simple
-This is an example of a restful CRUD API using node and typescript.
+This is an example of a low level CRUD API using node and typescript.
 Their are no dependencies and only a get request is used for all operations.
 The widgets are not persisted and will disappear when the server shuts down.
 ###Usage:

@@ -100,7 +100,6 @@ getData('widgetData.db', (err, data: {idx: number, widgets: widget[]}): void => 
 
 
 http.createServer(function(req, res){
-  //console.log(req.url, req.method, req.headers);
   let result;
   let input = url.parse(req.url,true).query;
   if(!(input.id)) input.id = 0;
