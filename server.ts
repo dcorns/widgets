@@ -69,10 +69,13 @@ let storeWidget = (widg: widget, ary: widget[]): widget[] =>{
   return ary;
 };
 
-let runCommand = (method: string, obj: {id:string, name:string, description:string, price:string}): any =>{
+let runCommand = (method: string, obj: {id:string, name?:string, description?:string, price?:string}): any =>{
   switch (method){
     case 'POST':
-      return storeWidget(makeWidget(obj, currentId++), widgets);
+      let name: string = obj.name;
+      let description: string = obj.description;
+      let price = obj.price;
+      return storeWidget(makeWidget({name: name, description: description, price: price}, currentId++), widgets);
     case 'GET':
       if(parseInt(obj.id, 10) > 0) return getOneWidget(parseInt(obj.id, 10), widgets);
       return widgets;
